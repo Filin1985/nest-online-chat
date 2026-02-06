@@ -1,8 +1,19 @@
-import { IsEmail, IsNotEmpty, Length, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  Length,
+  Matches,
+} from 'class-validator';
+import MESSAGES from 'src/lib/constants/message';
+import REGEX from 'src/lib/constants/regex';
 
 export class UsersRegisterReqDto {
   @IsNotEmpty()
   name: string;
+
+  @IsString()
+  address: string;
 
   @IsEmail()
   @IsNotEmpty()
@@ -10,17 +21,15 @@ export class UsersRegisterReqDto {
 
   @IsNotEmpty()
   @Length(8, 24)
-  @Matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/, {
-    message:
-      'Password must contain at least one letter, one number and one special character',
+  @Matches(REGEX.PASSWORD_RULE, {
+    message: MESSAGES.PASSWORD_RULE_MESSAGE,
   })
   password: string;
 
   @IsNotEmpty()
   @Length(8, 24)
-  @Matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/, {
-    message:
-      'Password must contain at least one letter, one number and one special character',
+  @Matches(REGEX.PASSWORD_RULE, {
+    message: MESSAGES.PASSWORD_RULE_MESSAGE,
   })
   confirmPassword: string;
 }

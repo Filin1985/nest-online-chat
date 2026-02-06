@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersRegisterReqDto } from './dto/users-register.req.dto';
+import SETTINGS from 'src/lib/constants/settings';
 
 @Controller('users')
 export class UsersController {
@@ -14,11 +15,7 @@ export class UsersController {
 
   @Post('/register')
   async register(
-    @Body(
-      new ValidationPipe({
-        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-      }),
-    )
+    @Body(SETTINGS.VALIDATION_PIPE)
     body: UsersRegisterReqDto,
   ) {
     return await this.usersService.register(body);
