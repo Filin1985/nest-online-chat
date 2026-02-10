@@ -12,7 +12,7 @@ import * as bcrypt from 'bcrypt';
 @Entity({
   name: 'users',
   orderBy: {
-    createAt: 'DESC',
+    createdAt: 'DESC',
   },
 })
 export class Users extends BaseEntity {
@@ -32,14 +32,18 @@ export class Users extends BaseEntity {
   password: string;
 
   @CreateDateColumn()
-  createAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updateAt: Date;
+  updatedAt: Date;
 
   @BeforeInsert()
   async setPassword(): Promise<void> {
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(this.password, salt);
+  }
+
+  async comparePassword(password: string): Promise<boolean> {
+    return await bcrypt.compare(password, this.password);
   }
 }
