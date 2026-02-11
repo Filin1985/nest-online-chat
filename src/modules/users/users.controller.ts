@@ -14,6 +14,7 @@ import { UsersLoginReqDto } from './dto/users-login.req.dto';
 import { JwtAuthGuard } from 'src/lib/guards/jwt-auth.guard';
 import { Users } from './users.entity';
 import { CurrentUser } from 'src/lib/decorators/current-user.decorator';
+import { UsersProfileResDto } from './dto/users-profile.res.dto';
 
 @Controller('users')
 export class UsersController {
@@ -37,7 +38,9 @@ export class UsersController {
 
   @Get('/profile')
   @UseGuards(JwtAuthGuard)
-  async getProfile(@CurrentUser() user: Users) {
+  async getProfile(
+    @CurrentUser() user: Users,
+  ): Promise<UsersProfileResDto | null> {
     return await this.usersService.getProfile(user.id);
   }
 }
