@@ -10,12 +10,15 @@ import { Repository } from 'typeorm';
 import { UsersRegisterReqDto } from './dto/users-register.req.dto';
 import { UsersLoginReqDto } from './dto/users-login.req.dto';
 import MESSAGES from 'src/lib/constants/message';
+import { JwtService } from '@nestjs/jwt';
+import { UsersProfileResDto } from './dto/users-profile.res.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
+    private jwtService: JwtService,
   ) {}
 
   async register(body: UsersRegisterReqDto) {
@@ -51,10 +54,31 @@ export class UsersService {
       throw new UnauthorizedException(MESSAGES.INVALID_EMAIL_OR_PASSWORD);
     }
 
+    const payload = { sub: user.id, emit: user.email };
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+
+    return {
+      accessToken,
+    };
+  }
+
+  async findById(id: number): Promise<Users | null> {
+    return await this.usersRepository.findOne({ where: { id } });
+  }
+
+  async getProfile(id: number): Promise<UsersProfileResDto | null> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new UnauthorizedException('User does not exist');
+    }
+
     return {
       id: user.id,
       name: user.name,
       email: user.email,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   }
 }
