@@ -7,10 +7,11 @@ import { JwtStrategy } from 'src/lib/strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { BlacklistedTokens } from './blacklisted-tokens.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Users]),
+    TypeOrmModule.forFeature([Users, BlacklistedTokens]),
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],

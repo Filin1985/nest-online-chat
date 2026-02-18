@@ -14,10 +14,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('JWT_SECRET') || 'defaultSecret',
+      passReqToCallback: true,
     });
   }
 
-  async validate(payload: { sub: number }) {
+  async validate(req: Request, payload: { sub: number }) {
+    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+
+    if (token && (await this.userService.isTokenBlacklisted(token))) {
+      throw new UnauthorizedException('Token is blacklisted');
+    }
+
     const user = await this.userService.findById(payload.sub);
     if (!user) {
       throw new UnauthorizedException('User does not exist');

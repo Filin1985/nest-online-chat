@@ -12,12 +12,16 @@ import { UsersLoginReqDto } from './dto/users-login.req.dto';
 import MESSAGES from 'src/lib/constants/message';
 import { JwtService } from '@nestjs/jwt';
 import { UsersProfileResDto } from './dto/users-profile.res.dto';
+import { UserLogoutResponseDto } from './dto/users-logout.res.dto';
+import { BlacklistedTokens } from './blacklisted-tokens.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
+    @InjectRepository(BlacklistedTokens)
+    private readonly blacklistedTokensRepository: Repository<BlacklistedTokens>,
     private jwtService: JwtService,
   ) {}
 
@@ -80,5 +84,37 @@ export class UsersService {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
+  }
+
+  async logout(token: string): Promise<UserLogoutResponseDto> {
+    const decodedToken = this.jwtService.decode<{ exp: number }>(token);
+
+    const expiresAt = decodedToken?.exp
+      ? new Date(decodedToken.exp * 1000)
+      : new Date(Date.now() * 3600000);
+    const existing = await this.isTokenBlacklisted(token);
+
+    if (existing) {
+      return {
+        message: 'Token is already blacklisted',
+      };
+    }
+
+    const blacklistedToken = this.blacklistedTokensRepository.create({
+      token,
+      expiresAt,
+    });
+    await this.blacklistedTokensRepository.save(blacklistedToken);
+
+    return {
+      message: 'Successfully logged out',
+    };
+  }
+
+  async isTokenBlacklisted(token: string): Promise<boolean> {
+    const existing = await this.blacklistedTokensRepository.findOne({
+      where: { token },
+    });
+    return Boolean(existing);
   }
 }
