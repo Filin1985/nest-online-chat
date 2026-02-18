@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from './users.entity';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { UsersRegisterReqDto } from './dto/users-register.req.dto';
 import { UsersLoginReqDto } from './dto/users-login.req.dto';
 import MESSAGES from 'src/lib/constants/message';
@@ -14,6 +14,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersProfileResDto } from './dto/users-profile.res.dto';
 import { UserLogoutResponseDto } from './dto/users-logout.res.dto';
 import { BlacklistedTokens } from './blacklisted-tokens.entity';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class UsersService {
@@ -116,5 +117,16 @@ export class UsersService {
       where: { token },
     });
     return Boolean(existing);
+  }
+
+  @Cron(CronExpression.EVERY_HOUR)
+  async cleanExpiredTokens() {
+    {
+      const now = new Date();
+      const result = await this.blacklistedTokensRepository.delete({
+        expiresAt: LessThan(now),
+      });
+      console.log(`Cleaned up ${result.affected || 0} expired tokens`);
+    }
   }
 }
