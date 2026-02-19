@@ -12,9 +12,6 @@ export class UsersRegisterReqDto {
   @IsNotEmpty()
   name: string;
 
-  @IsString()
-  address: string;
-
   @IsEmail()
   @IsNotEmpty()
   email: string;

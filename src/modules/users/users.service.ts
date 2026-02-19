@@ -36,7 +36,6 @@ export class UsersService {
     }
 
     const user = this.usersRepository.create({
-      address: body.address,
       name: body.name,
       email: body.email,
       password: body.password,
