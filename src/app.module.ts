@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './modules/users/users.module';
 import { dataSourceOptions } from 'db/data-source';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ChatModule } from './modules/chat/chat.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     TypeOrmModule.forRoot(dataSourceOptions),
     ScheduleModule.forRoot(),
     UsersModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

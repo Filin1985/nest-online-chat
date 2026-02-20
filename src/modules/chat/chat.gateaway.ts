@@ -28,13 +28,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @InjectRepository(ChatMessage)
     private chatMessageRepository: Repository<ChatMessage>,
   ) {}
+
   handleDisconnect(client: Socket) {
-    if (client.data.userId) {
+    const username = client.data.username as string;
+    const userId = client.data.userId as string;
+
+    if (username) {
       console.log('user disconnected', client.data.username);
 
-      this.server.emit('userDisconnected', {
-        userId: client.data.userId,
-        username: client.data.username,
+      this.server.emit('userLeft', {
+        userId,
+        username,
         timestamp: new Date(),
       });
 
